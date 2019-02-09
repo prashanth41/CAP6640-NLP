@@ -5,6 +5,9 @@ import sys
 
 
 file = sys.argv[1]
+if '.txt' not in file:
+	file = file + '.txt'
+
 windowSize = int(sys.argv[2])
 
 with open(file,'r') as f:
@@ -117,6 +120,15 @@ print(coOccurrenceArray)
 
 la = np.linalg
 U, s , V = la.svd(coOccurrenceArray, full_matrices=False)
+
+U = np.around(U, decimals=5)
 print(U)
 
-# word2vec = 
+
+word2vec = U[:(2*windowSize),:]
+
+
+word2vec = np.transpose(word2vec)
+print(word2vec)
+
+
