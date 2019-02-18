@@ -24,8 +24,8 @@ print(lines)
 X=[]
 y=[]
 
-for i in range(len(lines)):
-# for i in range(19):
+# for i in range(len(lines)):
+for i in range(20):
 	X.append(lines[i][0])
 	y.append(lines[i][1])
 
@@ -118,19 +118,71 @@ def feature_f1(X,wordsMatrix):
 
 
 
+def features(X,wordsMatrix,n):
+	grams=[]
+
+	for i in range(len(wordsMatrix)):
+		for j in range(len(wordsMatrix[i])-(n-1)):
+			temp=''
+			for k in range(n):
+				temp+=wordsMatrix[i][j+k]
+			grams.append(temp)
+
+	print(grams)
+
+	uniqueGrams=sorted(list(set(grams)))
+	print(uniqueGrams)
+
+	featureMatrix=np.zeros((len(wordsMatrix),len(uniqueGrams)),dtype=np.int)
+
+	for i in range(len(wordsMatrix)):
+		for j in range(len(wordsMatrix[i])-(n-1)):
+			temp=''
+			for k in range(n):
+				temp+=wordsMatrix[i][j+k]
+
+			for l in range(len(uniqueGrams)):
+				if temp==uniqueGrams[l]:
+					featureMatrix[i][l]+=1
+
+	print(featureMatrix)
+	print(grams)
+	print(uniqueGrams)
+	print(len(uniqueGrams))
+	print(len(grams))
+
+
+
+
+	return featureMatrix
+
+
+featureMatrix=features(X,wordsMatrix,2)
+
+featuresSum=0
+for i in range(len(featureMatrix)):
+	for j in range(len(featureMatrix[i])):
+		featuresSum+=featureMatrix[i][j]
+
+print(featuresSum)
+
+
+
+
+
 
 ################# Training SVM for classification##############
 
-X_train, X_test, y_train, y_test = train_test_split(featureMatrix, y, test_size = 0.10)
-svclassifier = svm.SVC(kernel='linear')  
-svclassifier.fit(X_train, y_train) 
-y_pred = svclassifier.predict(X_test)
+# X_train, X_test, y_train, y_test = train_test_split(featureMatrix, y, test_size = 0.10)
+# svclassifier = svm.SVC(kernel='linear')  
+# svclassifier.fit(X_train, y_train) 
+# y_pred = svclassifier.predict(X_test)
 
-print(confusion_matrix(y_test,y_pred))  
-print(classification_report(y_test,y_pred))
-print(accuracy_score(y_test,y_pred))
-print('\n')
-print(X_test[-1:])
-print(svclassifier.predict(X_test[-1:]))
+# print(confusion_matrix(y_test,y_pred))  
+# print(classification_report(y_test,y_pred))
+# print(accuracy_score(y_test,y_pred))
+# print('\n')
+# print(X_test[-1:])
+# print(svclassifier.predict(X_test[-1:]))
 
 
