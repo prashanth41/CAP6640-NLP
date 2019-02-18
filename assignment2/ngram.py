@@ -1,5 +1,4 @@
 import numpy as np
-import re
 import pandas as pd
 from sklearn import svm
 from sklearn.model_selection import train_test_split 
@@ -24,8 +23,8 @@ print(lines)
 X=[]
 y=[]
 
-# for i in range(len(lines)):
-for i in range(20):
+for i in range(len(lines)):
+# for i in range(20):
 	X.append(lines[i][0])
 	y.append(lines[i][1])
 
@@ -157,7 +156,7 @@ def features(X,wordsMatrix,n):
 	return featureMatrix
 
 
-featureMatrix=features(X,wordsMatrix,2)
+featureMatrix=features(X,wordsMatrix,1)
 
 featuresSum=0
 for i in range(len(featureMatrix)):
@@ -168,21 +167,112 @@ print(featuresSum)
 
 
 
+#################10-fold cross valiadtion###############
+
+Xpos=[]
+Xneg=[]
+ypos=[]
+yneg=[]
+
+for i in range(len(y)):
+	if y[i]=='0':
+		yneg.append(y[i])
+		Xneg.append(featureMatrix[i])
+
+	elif y[i]=='1':
+		ypos.append(y[i])
+		Xpos.append(featureMatrix[i])
+
+# print(len(ypos))
+# print(len(Xneg))
 
 
+foldLength=len(ypos)//10
+print(foldLength)
+
+
+
+for i in range(10):
+
+	print("for fold = %d" %(i+1))
+
+	X_train=[]
+	y_train=[]
+	X_test=[]
+	y_test=[]
+
+
+	if i==0:
+
+		X_test+=(Xpos[:50])
+		X_test+=(Xneg[:50])
+
+		y_test+=(ypos[:50])
+		y_test+=(yneg[:50])
+
+		X_train+=(Xpos[50:])
+		X_train+=(Xneg[50:])
+
+		y_train+=(ypos[50:])
+		y_train+=(yneg[50:])
+
+
+	if i==9:
+
+		X_test+=(Xpos[foldLength*9:])
+		X_test+=(Xneg[foldLength*9:])
+
+		y_test+=(ypos[foldLength*9:])
+		y_test+=(yneg[foldLength*9:])
+
+		X_train+=(Xpos[:foldLength*9])
+		X_train+=(Xneg[:foldLength*9])
+
+		y_train+=(ypos[:foldLength*9])
+		y_train+=(yneg[:foldLength*9])
+
+
+	else:
+
+
+
+		X_test+=(Xpos[i*foldLength:(i+1)*foldLength])
+		X_test+=(Xneg[i*foldLength:(i+1)*foldLength])
+
+		y_test+=(ypos[i*foldLength:(i+1)*foldLength])
+		y_test+=(yneg[i*foldLength:(i+1)*foldLength])
+
+		X_train+=(Xpos[0:i*foldLength])
+		X_train+=(Xpos[(i+1)*foldLength:])
+		X_train+=(Xneg[0:i*foldLength])
+		X_train+=(Xneg[(i+1)*foldLength:])
+
+		y_train+=(ypos[0:i*foldLength])
+		y_train+=(ypos[(i+1)*foldLength:])
+		y_train+=(yneg[0:i*foldLength])
+		y_train+=(yneg[(i+1)*foldLength:])
+
+
+	print(i)
+	print(len(X_train))
+	print(len(X_test))
+	print(len(y_train))
+	print(len(y_test))
+	print(len(ypos))
+	print(len(Xneg))
 
 ################# Training SVM for classification##############
 
-# X_train, X_test, y_train, y_test = train_test_split(featureMatrix, y, test_size = 0.10)
-# svclassifier = svm.SVC(kernel='linear')  
-# svclassifier.fit(X_train, y_train) 
-# y_pred = svclassifier.predict(X_test)
 
-# print(confusion_matrix(y_test,y_pred))  
-# print(classification_report(y_test,y_pred))
-# print(accuracy_score(y_test,y_pred))
-# print('\n')
-# print(X_test[-1:])
-# print(svclassifier.predict(X_test[-1:]))
+	svclassifier = svm.SVC(kernel='linear')  
+	svclassifier.fit(X_train, y_train) 
+	y_pred = svclassifier.predict(X_test)
+
+	print(confusion_matrix(y_test,y_pred))  
+	print(classification_report(y_test,y_pred))
+	print(accuracy_score(y_test,y_pred))
+	print('\n')
+	# print(X_test[-1:])
+	# print(svclassifier.predict(X_test[-1:]))
 
 
