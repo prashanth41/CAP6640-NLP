@@ -4,8 +4,11 @@ from sklearn import svm
 from sklearn.model_selection import train_test_split 
 from sklearn.metrics import classification_report, confusion_matrix 
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
 
-with open('data/amazon_cells_labelled.txt','r+') as f:
+
+with open('data/imdb_labelled.txt','r+') as f:
 	lines=[]
 	for line in f:
 		lines.append(line.lower())
@@ -49,6 +52,9 @@ for i in range(len(X)):
 
 X=tempX
 print(X)
+
+for i in range(len(y)):
+	y[i]=int(y[i])
 
 wordsMatrix=[]
 for i in X:
@@ -156,7 +162,7 @@ def features(X,wordsMatrix,n):
 	return featureMatrix
 
 
-featureMatrix=features(X,wordsMatrix,1)
+featureMatrix=features(X,wordsMatrix,3)
 
 featuresSum=0
 for i in range(len(featureMatrix)):
@@ -175,11 +181,11 @@ ypos=[]
 yneg=[]
 
 for i in range(len(y)):
-	if y[i]=='0':
+	if y[i]==0:
 		yneg.append(y[i])
 		Xneg.append(featureMatrix[i])
 
-	elif y[i]=='1':
+	elif y[i]==1:
 		ypos.append(y[i])
 		Xpos.append(featureMatrix[i])
 
@@ -187,8 +193,32 @@ for i in range(len(y)):
 # print(len(Xneg))
 
 
+def classifiy(X_train,y_train,X_test,y_test):
+
+	svclassifier = svm.SVC(kernel='linear')  
+	svclassifier.fit(X_train, y_train) 
+	y_pred = svclassifier.predict(X_test)
+
+	print(confusion_matrix(y_test,y_pred)) 
+	confusionMatrix=confusion_matrix(y_test,y_pred) 
+	# print(classification_report(y_test,y_pred))
+	print(accuracy_score(y_test,y_pred))
+	precision=precision_score(y_test, y_pred)
+	recall=recall_score(y_test, y_pred)
+	accuracy=accuracy_score(y_test,y_pred)
+	# accuracy+=accuracy_score(y_test,y_pred)
+
+	return accuracy,precision,recall,confusionMatrix
+
+
+
 foldLength=len(ypos)//10
 print(foldLength)
+
+accuracyList=[]
+confusionMatrixSum=np.zeros((2,2),dtype=np.int)
+precisionList=[]
+recallList=[]
 
 
 
@@ -204,20 +234,20 @@ for i in range(10):
 
 	if i==0:
 
-		X_test+=(Xpos[:50])
-		X_test+=(Xneg[:50])
+		X_test+=(Xpos[:(i+1)*foldLength])
+		X_test+=(Xneg[:(i+1)*foldLength])
 
-		y_test+=(ypos[:50])
-		y_test+=(yneg[:50])
+		y_test+=(ypos[:(i+1)*foldLength])
+		y_test+=(yneg[:(i+1)*foldLength])
 
-		X_train+=(Xpos[50:])
-		X_train+=(Xneg[50:])
+		X_train+=(Xpos[(i+1)*foldLength:])
+		X_train+=(Xneg[(i+1)*foldLength:])
 
-		y_train+=(ypos[50:])
-		y_train+=(yneg[50:])
+		y_train+=(ypos[(i+1)*foldLength:])
+		y_train+=(yneg[(i+1)*foldLength:])
 
 
-	if i==9:
+	elif i==9:
 
 		X_test+=(Xpos[foldLength*9:])
 		X_test+=(Xneg[foldLength*9:])
@@ -253,26 +283,43 @@ for i in range(10):
 		y_train+=(yneg[(i+1)*foldLength:])
 
 
-	print(i)
-	print(len(X_train))
-	print(len(X_test))
-	print(len(y_train))
-	print(len(y_test))
-	print(len(ypos))
-	print(len(Xneg))
+	X_train=np.array(X_train)
+	y_train=np.array(y_train)
+	X_test=np.array(X_test)
+	y_test=np.array(y_test)
+
+	# print(i)
+	# print(len(X_train))
+	# print(len(X_test))
+	# print(len(y_train))
+	# print(len(y_test))
+	# print(len(ypos))
+	# print(len(Xneg))
+
+
+
+	# print(len(Xpos[0]))
+	# print(len(X_test[0]))
 
 ################# Training SVM for classification##############
 
 
-	svclassifier = svm.SVC(kernel='linear')  
-	svclassifier.fit(X_train, y_train) 
-	y_pred = svclassifier.predict(X_test)
+	accuracy,precision,recall,confusionMatrix=classifiy(X_train,y_train,X_test,y_test)
 
-	print(confusion_matrix(y_test,y_pred))  
-	print(classification_report(y_test,y_pred))
-	print(accuracy_score(y_test,y_pred))
+	accuracyList.append(accuracy)
+	precisionList.append(precision)
+	recallList.append(recall)
+
+	for i in range(len(confusionMatrix)):
+		for j in range(len(confusionMatrix[i])):
+			confusionMatrixSum[i][j]+=confusionMatrix[i][j]
+
 	print('\n')
 	# print(X_test[-1:])
 	# print(svclassifier.predict(X_test[-1:]))
 
+print(np.sum(accuracyList)/10)
+print(np.sum(precisionList)/10)
+print(np.sum(recallList)/10)
+print(confusionMatrixSum)
 
