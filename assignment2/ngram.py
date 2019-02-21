@@ -8,7 +8,7 @@ from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 
 
-with open('data/imdb_labelled.txt','r+') as f:
+with open('data/yelp_labelled.txt','r+') as f:
 	lines=[]
 	for line in f:
 		lines.append(line.lower())
@@ -64,37 +64,41 @@ for i in X:
 print(wordsMatrix)
 
 
-def feature_f1(X,wordsMatrix):
+# #####################################################
 
-	# wordsMatrix=[]
-	# for i in X:
+# def feature_f1(X,wordsMatrix):
 
-	# 	wordsMatrix.append(i.split())
+# 	# wordsMatrix=[]
+# 	# for i in X:
 
-	words=[]
+# 	# 	wordsMatrix.append(i.split())
 
-	for i in wordsMatrix:
-		for j in i:
-			words.append(j)
+# 	words=[]
 
-
-	uniqueWords=sorted(list(set(words)))
-	# print(uniqueWords)
-	print(len(uniqueWords))
-
-	featureMatrix=np.zeros((1000,len(uniqueWords)),dtype=np.int)
-	# print(featureMatrix)
-
-	for i in range(len(wordsMatrix)):
-		for j in range(len(wordsMatrix[i])):
-			for k in range(len(uniqueWords)):
-				if wordsMatrix[i][j]==uniqueWords[k]:
-					featureMatrix[i][k]+=1
-
-	# print(featureMatrix)
+# 	for i in wordsMatrix:
+# 		for j in i:
+# 			words.append(j)
 
 
-	return featureMatrix
+# 	uniqueWords=sorted(list(set(words)))
+# 	# print(uniqueWords)
+# 	print(len(uniqueWords))
+
+# 	featureMatrix=np.zeros((1000,len(uniqueWords)),dtype=np.int)
+# 	# print(featureMatrix)
+
+# 	for i in range(len(wordsMatrix)):
+# 		for j in range(len(wordsMatrix[i])):
+# 			for k in range(len(uniqueWords)):
+# 				if wordsMatrix[i][j]==uniqueWords[k]:
+# 					featureMatrix[i][k]+=1
+
+# 	# print(featureMatrix)
+
+
+# 	return featureMatrix
+
+################################################################
 
 
 # featureMatrix=feature_f1(X,wordsMatrix)
@@ -133,10 +137,10 @@ def features(X,wordsMatrix,n):
 				temp+=wordsMatrix[i][j+k]
 			grams.append(temp)
 
-	print(grams)
+	# print(grams)
 
 	uniqueGrams=sorted(list(set(grams)))
-	print(uniqueGrams)
+	# print(uniqueGrams)
 
 	featureMatrix=np.zeros((len(wordsMatrix),len(uniqueGrams)),dtype=np.int)
 
@@ -150,11 +154,11 @@ def features(X,wordsMatrix,n):
 				if temp==uniqueGrams[l]:
 					featureMatrix[i][l]+=1
 
-	print(featureMatrix)
-	print(grams)
-	print(uniqueGrams)
-	print(len(uniqueGrams))
-	print(len(grams))
+	# print(featureMatrix)
+	# print(grams)
+	# print(uniqueGrams)
+	# print(len(uniqueGrams))
+	# print(len(grams))
 
 
 
@@ -162,7 +166,18 @@ def features(X,wordsMatrix,n):
 	return featureMatrix
 
 
-featureMatrix=features(X,wordsMatrix,3)
+featureMatrix=features(X,wordsMatrix,5)
+
+f1=features(X,wordsMatrix,1)
+f2=features(X,wordsMatrix,2)
+f3=features(X,wordsMatrix,3)
+f4=features(X,wordsMatrix,4)
+f5=features(X,wordsMatrix,5)
+
+f1f2 = np.concatenate((f1, f2), axis=1)
+f1f2f3 = np.concatenate((f1, f2, f3), axis=1)
+f1f2f3f4 = np.concatenate((f1, f2, f3, f4), axis=1)
+f1f2f3f4f5 = np.concatenate((f1, f2, f3, f4, f5), axis=1)
 
 featuresSum=0
 for i in range(len(featureMatrix)):
@@ -170,7 +185,10 @@ for i in range(len(featureMatrix)):
 		featuresSum+=featureMatrix[i][j]
 
 print(featuresSum)
-
+print(len(featureMatrix))
+print(len(f1[0]))
+print(len(f2[0]))
+print(len(f1f2[0]))
 
 
 #################10-fold cross valiadtion###############
@@ -183,11 +201,11 @@ yneg=[]
 for i in range(len(y)):
 	if y[i]==0:
 		yneg.append(y[i])
-		Xneg.append(featureMatrix[i])
+		Xneg.append(f1f2f3f4f5[i])
 
 	elif y[i]==1:
 		ypos.append(y[i])
-		Xpos.append(featureMatrix[i])
+		Xpos.append(f1f2f3f4f5[i])
 
 # print(len(ypos))
 # print(len(Xneg))
